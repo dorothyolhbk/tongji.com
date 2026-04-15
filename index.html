@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>网站统计仪表板 - 实时数据分析</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @keyframes pulse-dot {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .pulse-dot {
+            animation: pulse-dot 2s infinite;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        .card-hover {
+            transition: all 0.3s ease;
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        .number-change {
+            transition: all 0.5s ease;
+        }
+        .positive-change {
+            color: #10b981;
+        }
+        .negative-change {
+            color: #ef4444;
+        }
+        .url-link {
+            transition: all 0.2s ease;
+        }
+        .url-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        /* 手机端优化 - 仅在小屏幕上生效 */
+        @media (max-width: 768px) {
+            /* 防止横向滚动 */
+            body {
+                overflow-x: hidden;
+                min-width: 320px;
+            }
+            
+            /* 导航栏优化 */
+            .gradient-bg .container {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+                padding-top: 1rem !important;
+                padding-bottom: 1rem !important;
+            }
+            
+            .gradient-bg .flex.items-center.justify-between {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.75rem;
+            }
+            
+            .gradient-bg .flex.items-center.space-x-4 {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .gradient-bg .flex.items-center.space-x-6 {
+                width: 100%;
+                justify-content: space-between;
+                margin-top: 0.5rem;
+            }
+            
+            .gradient-bg h1.text-2xl {
+                font-size: 1.25rem;
+                margin: 0;
+            }
+            
+            .gradient-bg .text-sm {
+                font-size: 0.8rem;
+            }
+            
+            .gradient-bg i.fas.fa-chart-line {
+                font-size: 1.25rem;
+            }
+            
+            /* 主要内容区域优化 */
+            .container.mx-auto.px-6.py-8 {
+                padding-left: 1rem !important;
+                padding-right: 1rem !important;
+                padding-top: 1.5rem !important;
+                padding-bottom: 1.5rem !important;
+            }
+            
+            /* 网站链接卡片优化 */
+            .mb-8.bg-white.rounded-lg.shadow-md.p-6 {
+                margin-bottom: 1.5rem !important;
+                padding: 1.25rem !important;
+            }
+            
+            .url-link {
+                flex-direction: column;
+                align-items: stretch !important;
+            }
+            
+            .url-link .flex.items-center.space-x-4 {
+                width: 100%;
+                margin-bottom: 1rem;
+            }
+            
+            .url-link .flex.items-center.space-x-3 {
+                width: 100%;
+                justify-content: space-between;
+            }
+            
+            .url-link .truncate.max-w-md {
+                max-width: 100% !important;
+                font-size: 0.85rem;
+                white-space: normal;
+                word-break: break-all;
+                overflow-wrap: break-word;
+            }
+            
+            .url-link a.bg-blue-600 {
+                flex: 1;
+                min-height: 44px;
+                justify-content: center;
+            }
+            
+            .url-link button.bg-gray-100 {
+                min-width: 44px;
+                min-height: 44px;
+                margin-left: 0.5rem;
+            }
+            
+            /* 统计卡片网格优化 */
+            .grid.grid-cols-1.md\:grid-cols-2.lg\:grid-cols-4 {
+                grid-template-columns: 1fr !important;
+                gap: 1rem !important;
+            }
+            
+            .bg-white.rounded-lg.shadow-md.p-6.card-hover {
+                padding: 1.25rem !important;
+                margin: 0;
+            }
+            
+            .bg-white .text-3xl {
+                font-size: 1.75rem !important;
+            }
+            
+            .bg-white .text-gray-500.text-sm {
+                font-size: 0.85rem !important;
+            }
+            
+            .bg-white .border-t.pt-4 .text-sm {
+                font-size: 0.8rem !important;
+            }
+            
+            /* 进度条容器优化 */
+            .ml-2.w-full.bg-gray-200.rounded-full.h-2 {
+                margin-left: 0.5rem !important;
+                width: 60%;
+            }
+            
+            /* 昨日总览优化 */
+            .mt-8.bg-white.rounded-lg.shadow-md.p-6 {
+                margin-top: 1.5rem !important;
+                padding: 1.25rem !important;
+            }
+            
+            .grid.grid-cols-2.md\:grid-cols-4 {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 0.75rem !important;
+            }
+            
+            .text-center .text-xl {
+                font-size: 1.25rem !important;
+            }
+            
+            .text-center .text-sm {
+                font-size: 0.8rem !important;
+            }
+            
+            /* 触摸优化 */
+            button, a {
+                min-height: 44px;
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+            }
+            
+            /* 图标大小优化 */
+            .bg-blue-100.p-3.rounded-full i,
+            .bg-green-100.p-3.rounded-full i,
+            .bg-purple-100.p-3.rounded-full i,
+            .bg-orange-100.p-3.rounded-full i {
+                font-size: 1.25rem !important;
+            }
+            
+            .bg-blue-100.p-3.rounded-full,
+            .bg-green-100.p-3.rounded-full,
+            .bg-purple-100.p-3.rounded-full,
+            .bg-orange-100.p-3.rounded-full {
+                padding: 0.75rem !important;
+            }
+        }
+        
+        /* 更小屏幕的额外优化 */
+        @media (max-width: 375px) {
+            .gradient-bg h1.text-2xl {
+                font-size: 1.1rem;
+            }
+            
+            .bg-white .text-3xl {
+                font-size: 1.5rem !important;
+            }
+            
+            .url-link .truncate.max-w-md {
+                font-size: 0.75rem;
+            }
+            
+            .grid.grid-cols-2.md\:grid-cols-4 {
+                grid-template-columns: 1fr !important;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <!-- 顶部导航栏 -->
+    <nav class="gradient-bg text-white shadow-lg">
+        <div class="container mx-auto px-6 py-4">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-4">
+                    <i class="fas fa-chart-line text-2xl"></i>
+                    <h1 class="text-2xl font-bold">网站统计中心</h1>
+                </div>
+                <div class="flex items-center space-x-6">
+                    <div class="flex items-center space-x-2">
+                        <div class="w-3 h-3 bg-green-400 rounded-full pulse-dot"></div>
+                        <span class="text-sm">实时更新中</span>
+                    </div>
+                    <span id="currentTime" class="text-sm"></span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主要内容区域 -->
+    <div class="container mx-auto px-6 py-8">
+        <!-- 单个网站链接卡片 -->
+        <div class="mb-8 bg-white rounded-lg shadow-md p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-globe mr-2 text-blue-600"></i>
+                监控网站
+            </h2>
+            <div class="flex items-center justify-between bg-blue-50 p-4 rounded-lg url-link">
+                <div class="flex items-center space-x-4">
+                    <div class="bg-blue-100 p-3 rounded-lg">
+                        <i class="fas fa-link text-blue-600 text-xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-800 text-lg">主要网站</h3>
+                        <p class="text-gray-600 truncate max-w-md">https://baiwandaohang.shop/</p>
+                        <div class="flex items-center mt-2 space-x-4">
+                            <span class="text-sm text-green-600">
+                                <i class="fas fa-circle text-xs mr-1"></i> 在线
+                            </span>
+                            <span class="text-sm text-gray-500">
+                                今日访问: <span class="font-semibold" id="siteVisits">0</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-3">
+                    <a href="https://baiwandaohang.shop/" target="_blank" 
+                       class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors flex items-center">
+                        <i class="fas fa-external-link-alt mr-2"></i>访问网站
+                    </a>
+                    <button onclick="copyLink()" class="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg hover:bg-gray-200 transition-colors">
+                        <i class="fas fa-copy"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 统计卡片区域 -->
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- 今日IP访问量 -->
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500 text-sm">今日IP访问量</p>
+                        <p class="text-3xl font-bold text-gray-800 number-change" id="todayIP">0</p>
+                    </div>
+                    <div class="bg-blue-100 p-3 rounded-full">
+                        <i class="fas fa-users text-blue-600 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="border-t pt-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">昨日同期</span>
+                        <span class="font-semibold" id="yesterdayIP">721,424</span>
+                    </div>
+                    <div class="flex items-center mt-2">
+                        <span id="ipChange" class="text-sm font-semibold positive-change">
+                            <i class="fas fa-arrow-up mr-1"></i> +8.1%
+                        </span>
+                        <div class="ml-2 w-full bg-gray-200 rounded-full h-2">
+                            <div id="ipProgressBar" class="bg-green-500 h-2 rounded-full" style="width: 8.1%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 页面浏览量 -->
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500 text-sm">页面浏览量</p>
+                        <p class="text-3xl font-bold text-gray-800 number-change" id="pageViews">0</p>
+                    </div>
+                    <div class="bg-green-100 p-3 rounded-full">
+                        <i class="fas fa-eye text-green-600 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="border-t pt-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">昨日同期</span>
+                        <span class="font-semibold" id="yesterdayViews">1421,424</span>
+                    </div>
+                    <div class="flex items-center mt-2">
+                        <span id="viewsChange" class="text-sm font-semibold positive-change">
+                            <i class="fas fa-arrow-up mr-1"></i> +8.3%
+                        </span>
+                        <div class="ml-2 w-full bg-gray-200 rounded-full h-2">
+                            <div id="viewsProgressBar" class="bg-green-500 h-2 rounded-full" style="width: 8.3%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 平均停留时间 -->
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500 text-sm">平均停留时间</p>
+                        <p class="text-3xl font-bold text-gray-800" id="avgTime">3:45</p>
+                    </div>
+                    <div class="bg-purple-100 p-3 rounded-full">
+                        <i class="fas fa-clock text-purple-600 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="border-t pt-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">昨日同期</span>
+                        <span class="font-semibold" id="yesterdayTime">3:50</span>
+                    </div>
+                    <div class="flex items-center mt-2">
+                        <span id="timeChange" class="text-sm font-semibold negative-change">
+                            <i class="fas fa-arrow-down mr-1"></i> -2.1%
+                        </span>
+                        <div class="ml-2 w-full bg-gray-200 rounded-full h-2">
+                            <div id="timeProgressBar" class="bg-red-500 h-2 rounded-full" style="width: 2.1%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 跳出率 -->
+            <div class="bg-white rounded-lg shadow-md p-6 card-hover">
+                <div class="flex items-center justify-between mb-4">
+                    <div>
+                        <p class="text-gray-500 text-sm">跳出率</p>
+                        <p class="text-3xl font-bold text-gray-800" id="bounceRate">42.3%</p>
+                    </div>
+                    <div class="bg-orange-100 p-3 rounded-full">
+                        <i class="fas fa-sign-out-alt text-orange-600 text-2xl"></i>
+                    </div>
+                </div>
+                <div class="border-t pt-4">
+                    <div class="flex justify-between text-sm">
+                        <span class="text-gray-600">昨日同期</span>
+                        <span class="font-semibold" id="yesterdayBounce">44.5%</span>
+                    </div>
+                    <div class="flex items-center mt-2">
+                        <span id="bounceChange" class="text-sm font-semibold positive-change">
+                            <i class="fas fa-arrow-down mr-1"></i> -5.2%
+                        </span>
+                        <div class="ml-2 w-full bg-gray-200 rounded-full h-2">
+                            <div id="bounceProgressBar" class="bg-green-500 h-2 rounded-full" style="width: 5.2%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 昨日总览卡片（简化版） -->
+        <div class="mt-8 bg-white rounded-lg shadow-md p-6">
+            <h3 class="text-lg font-bold text-gray-800 mb-4 flex items-center">
+                <i class="fas fa-history mr-2 text-gray-600"></i>
+                昨日数据总览
+            </h3>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="text-center">
+                    <p class="text-gray-500 text-sm">总IP访问</p>
+                    <p class="text-xl font-bold text-gray-800">721,424</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-500 text-sm">总浏览量</p>
+                    <p class="text-xl font-bold text-gray-800">1421,424</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-500 text-sm">平均停留</p>
+                    <p class="text-xl font-bold text-gray-800">3分50秒</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-gray-500 text-sm">平均跳出率</p>
+                    <p class="text-xl font-bold text-gray-800">44.5%</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 更新当前时间
+        function updateTime() {
+            const now = new Date();
+            document.getElementById('currentTime').textContent = 
+                now.toLocaleString('zh-CN', { 
+                    year: 'numeric', 
+                    month: '2-digit', 
+                    day: '2-digit', 
+                    hour: '2-digit', 
+                    minute: '2-digit', 
+                    second: '2-digit' 
+                });
+        }
+        setInterval(updateTime, 1000);
+        updateTime();
+
+        // IP数据按时间增长设置
+        const targetIP = 734181;
+        let currentIP = 0;
+        let lastDate = '';
+
+        // 昨日基准数据
+        const yesterdayData = {
+            ip: 734181,
+            views: 1487242,
+            time: 230, // 3分50秒 = 230秒
+            bounce: 44.5
+        };
+
+        // 24小时访问权重
+        const hourlyWeights = [
+            0.005, 0.005, 0.005, 0.005, 0.005, 0.005,
+            0.015, 0.025, 0.045, 0.075, 0.085, 0.075,
+            0.055, 0.045, 0.065, 0.075, 0.085, 0.075,
+            0.055, 0.035, 0.025, 0.015, 0.015, 0.005
+        ];
+
+        // 计算当前时间应该达到的IP数量
+        function calculateCurrentIP() {
+            const now = new Date();
+            const currentHour = now.getHours();
+            const currentMinute = now.getMinutes();
+            const currentSecond = now.getSeconds();
+            
+            // 检查是否是新的一天
+            const today = now.toDateString();
+            if (today !== lastDate) {
+                currentIP = 0;
+                lastDate = today;
+            }
+            
+            // 计算从0点到当前时间已经过去的完整小时数
+            let accumulatedWeight = 0;
+            for (let i = 0; i < currentHour; i++) {
+                accumulatedWeight += hourlyWeights[i];
+            }
+            
+            // 计算当前小时的进度
+            const currentHourProgress = (currentMinute * 60 + currentSecond) / 3600;
+            accumulatedWeight += hourlyWeights[currentHour] * currentHourProgress;
+            
+            // 计算当前应该达到的IP数量
+            const calculatedIP = Math.floor(targetIP * accumulatedWeight);
+            
+            // 确保IP只增不减
+            if (calculatedIP > currentIP) {
+                currentIP = calculatedIP;
+            }
+            
+            return currentIP;
+        }
+
+        // 更新对比数据和变化百分比
+        function updateComparisonData(currentIP, currentViews) {
+            const yesterdayIP = yesterdayData.ip;
+            const yesterdayViews = yesterdayData.views;
+            
+            // 计算变化百分比
+            const ipChangePercent = ((currentIP - yesterdayIP) / yesterdayIP * 100).toFixed(1);
+            const viewsChangePercent = ((currentViews - yesterdayViews) / yesterdayViews * 100).toFixed(1);
+            
+            // 更新IP变化显示
+            document.getElementById('ipChange').innerHTML = 
+                `<i class="fas fa-arrow-${ipChangePercent >= 0 ? 'up' : 'down'} mr-1"></i> ${Math.abs(ipChangePercent)}%`;
+            
+            // 更新浏览量变化显示
+            document.getElementById('viewsChange').innerHTML = 
+                `<i class="fas fa-arrow-${viewsChangePercent >= 0 ? 'up' : 'down'} mr-1"></i> ${Math.abs(viewsChangePercent)}%`;
+            
+            // 更新进度条
+            document.getElementById('ipProgressBar').style.width = `${Math.min(Math.abs(ipChangePercent), 100)}%`;
+            document.getElementById('viewsProgressBar').style.width = `${Math.min(Math.abs(viewsChangePercent), 100)}%`;
+            
+            // 更新样式
+            document.getElementById('ipChange').className = 
+                `text-sm font-semibold ${ipChangePercent >= 0 ? 'positive-change' : 'negative-change'}`;
+            document.getElementById('viewsChange').className = 
+                `text-sm font-semibold ${viewsChangePercent >= 0 ? 'positive-change' : 'negative-change'}`;
+        }
+
+        // 复制链接函数
+        function copyLink() {
+            const link = 'https://baiwandaohang.shop/';
+            navigator.clipboard.writeText(link).then(() => {
+                alert('链接已复制到剪贴板！');
+            });
+        }
+
+        // 更新IP显示
+        function updateIPDisplay() {
+            const ipElement = document.getElementById('todayIP');
+            const pageViewsElement = document.getElementById('pageViews');
+            const siteVisitsElement = document.getElementById('siteVisits');
+            
+            // 计算当前IP
+            const ip = calculateCurrentIP();
+            
+            // 更新IP数值
+            ipElement.textContent = ip.toLocaleString('zh-CN');
+            
+            // 更新页面浏览量（IP的2.8倍）
+            const pageViews = Math.floor(ip * 2.8);
+            pageViewsElement.textContent = pageViews.toLocaleString('zh-CN');
+            
+            // 更新网站访问次数（与IP相同）
+            siteVisitsElement.textContent = ip.toLocaleString('zh-CN');
+            
+            // 更新对比数据
+            updateComparisonData(ip, pageViews);
+        }
+
+        // 更新平均停留时间
+        function updateAvgTime() {
+            const baseMinutes = 3;
+            const baseSeconds = 45;
+            const fluctuation = Math.floor((Math.random() - 0.5) * 20);
+            
+            let totalSeconds = baseMinutes * 60 + baseSeconds + fluctuation;
+            const minutes = Math.floor(totalSeconds / 60);
+            const seconds = totalSeconds % 60;
+            
+            document.getElementById('avgTime').textContent = `${minutes}:${seconds.toString().padStart(2, '0')}`;
+            
+            // 计算时间变化百分比
+            const currentSeconds = minutes * 60 + seconds;
+            const timeChangePercent = ((currentSeconds - yesterdayData.time) / yesterdayData.time * 100).toFixed(1);
+            
+            document.getElementById('timeChange').innerHTML = 
+                `<i class="fas fa-arrow-${timeChangePercent >= 0 ? 'up' : 'down'} mr-1"></i> ${Math.abs(timeChangePercent)}%`;
+            document.getElementById('timeChange').className = 
+                `text-sm font-semibold ${timeChangePercent >= 0 ? 'positive-change' : 'negative-change'}`;
+            document.getElementById('timeProgressBar').style.width = `${Math.min(Math.abs(timeChangePercent), 100)}%`;
+        }
+
+        // 更新跳出率
+        function updateBounceRate() {
+            const baseRate = 42.3;
+            const fluctuation = (Math.random() - 0.5) * 1;
+            const newRate = (baseRate + fluctuation).toFixed(1);
+            
+            document.getElementById('bounceRate').textContent = `${newRate}%`;
+            
+            // 计算跳出率变化百分比
+            const bounceChangePercent = ((newRate - yesterdayData.bounce) / yesterdayData.bounce * 100).toFixed(1);
+            
+            document.getElementById('bounceChange').innerHTML = 
+                `<i class="fas fa-arrow-${bounceChangePercent >= 0 ? 'up' : 'down'} mr-1"></i> ${Math.abs(bounceChangePercent)}%`;
+            document.getElementById('bounceChange').className = 
+                `text-sm font-semibold ${bounceChangePercent >= 0 ? 'positive-change' : 'negative-change'}`;
+            document.getElementById('bounceProgressBar').style.width = `${Math.min(Math.abs(bounceChangePercent), 100)}%`;
+        }
+
+        // 模拟实时数据更新
+        function updateRealtimeData() {
+            updateIPDisplay();
+            updateAvgTime();
+            updateBounceRate();
+        }
+
+        // 初始化
+        updateRealtimeData();
+        
+        // 设置定时更新
+        setInterval(updateRealtimeData, 2000);
+    </script>
+</body>
+</html>
